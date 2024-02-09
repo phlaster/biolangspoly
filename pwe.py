@@ -8,7 +8,7 @@ MONOISOTOPIC_WEIGHTS = {
 
 def main():
     prot = input()
-    weight = sum([MONOISOTOPIC_WEIGHTS[aa] for aa in prot])
+    weight = sum((MONOISOTOPIC_WEIGHTS[aa] for aa in prot))
     print(weight)
 
 if __name__ == "__main__":
