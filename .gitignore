@@ -1,2 +1,4 @@
 dattest/
 **/*.fa
+venv/
+__pycache__/
