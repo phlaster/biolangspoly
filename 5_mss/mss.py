@@ -16,53 +16,31 @@ def fasta_sequences(fasta_filename):
             sequences.append(sequence)
     return sequences
 
-
-def check(length, strs):
-    seen_substrings = set()
-    for i in range(len(strs[0]) - length + 1):
-        substring = strs[0][i:i + length]
-        seen_substrings.add(substring)
     
-    for substring in seen_substrings:
-        if all(substring in s for s in strs[1:]):
-            return substring
-    return None
-
-
-def longest_common_substring(strs):
-    if not strs:
-        return "none"
-    low, high = 0, min(len(s) for s in strs)
-    result = "none"
-    while low <= high:
-        mid = (low + high) // 2
-        substr = check(mid, strs)
-        if substr:
-            result = substr
-            low = mid + 1
-        else:
-            high = mid - 1
-
-    return result
+def lcss(strings):
+    if not strings:
+        return ""
+    
+    shortest_str = min(strings, key=len)
+    longest_common_substring = ""
+    
+    for i in range(len(shortest_str)):
+        for j in range(i + 1, len(shortest_str) + 1):
+            if all(shortest_str[i:j] in string for string in strings):
+                if len(longest_common_substring) < j - i:
+                    longest_common_substring = shortest_str[i:j]
+    return longest_common_substring
 
 
 def main():
     filename = input()
     sequences = fasta_sequences(filename)
-    lcss = longest_common_substring(sequences)
-    print(lcss)
-
-# def tests():
-#     import os
-#     wd = os.path.abspath('mss' + os.sep + 'fastas')
-#     files = ["case_sensitivity.fa", "different_lengths.fa", "empty.fa", "identical_strings.fa", "large_input.fa", "no_common.fa", "sample.fa", "special_characters.fa"]
-#     for f in files:
-#         sequences = fasta_sequences(wd+os.sep+f)
-#         lcss = longest_common_substring(sequences)
-#         print(lcss)
-
+    L = lcss(sequences)
+    if L == "":
+        print("none")
+    else:
+        print(L)
 
 
 if __name__ == "__main__":
     main()
-    # tests()
