@@ -39,8 +39,7 @@ def show_step(t, h, R, counter, y, color=Fore.WHITE):
 
 
 def show_correct(S, color=Fore.GREEN):
-    print(color + S)
-    print(Style.RESET_ALL, end='')
+    print(color + S + Style.RESET_ALL)
 
 
 def extract_function(code_str):
