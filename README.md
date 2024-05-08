@@ -6,12 +6,14 @@
 Обратная комплементарная последовательность $dna^c$.
 
 ## Пример
-Входные данные
->CAGT
-
-Выходные данные
-> ACTG
-
+**Входные данные:**
+```txt
+CAGT
+```
+**Выходные данные:**
+```txt
+ACTG
+```
 
 # `trn.py`: Трансляция РНК
 ## Входные данные
@@ -21,12 +23,14 @@
 Последовательность белков, полученная кодированием кодонов в соответствии с таблицей
 
 ## Пример
-Входные данные
->CGUAUCGGUCACACCGCUAACAGCUGGGAAAGAUAG
-
-Выходные данные
->RIGHTANSWER
-
+**Входные данные:**
+```txt
+CGUAUCGGUCACACCGCUAACAGCUGGGAAAGAUAG
+```
+**Выходные данные:**
+```txt
+RIGHTANSWER
+```
 
 # `rtt.py`: Соотношение транзиций к трансверсиям
 ## Входные данные
@@ -36,14 +40,15 @@
 Соотношение транзиций к трансверсиям $R(s1, s2)$.
 
 ## Пример
-Входные данные
->ACGATCGCATGTCATCAACGTTTACGGCATGCAGCTAGCGATCGATTTCGCTATGCTTAGCATGACTCGGACTACGACTACGACT
-
->GCTAGTCACCACAGTCGCGATCGACGATCGGATCTCGACTTCGACTACTAGCGCGATTCGAAATCAGCTCGACTATTCGGGTATC
-
-Выходные данные
->0.7368421052631579
-
+**Входные данные:**
+```txt
+ACGATCGCATGTCATCAACGTTTACGGCATGCAGCTAGCGATCGATTTCGCTATGCTTAGCATGACTCGGACTACGACTACGACT
+GCTAGTCACCACAGTCGCGATCGACGATCGGATCTCGACTTCGACTACTAGCGCGATTCGAAATCAGCTCGACTATTCGGGTATC
+```
+**Выходные данные:**
+```txt
+0.7368421052631579
+```
 
 # `fis.py`: Поиск подстрок
 ## Входные данные
@@ -53,41 +58,66 @@
 Все индексы начала подстрок $t$ в строке $s$. Индексы выводятся через пробел.
 
 ## Пример
-Входные данные
->AGCGCGCATATGCGCGAAT
+**Входные данные:**
+```txt
+AGCGCGCATATGCGCGAAT
+GCGC
+```
+**Выходные данные:**
+```txt
+1 3 11
+```
 
->GCGC
-
-Выходные данные
->1 3 11
-
-Входные данные
->AGCGCGCATATGCGCGAAT
-
->ACGT
-
-Выходные данные
->none
+**Входные данные:**
+```txt
+AGCGCGCATATGCGCGAAT
+ACGT
+```
+**Выходные данные:**
+```txt
+none
+```
 
 
 # `mss.py`: Поиск наибольшей подстроки
-$$
-...
-$$
+Нужно найти наибольшую общую подстроку (не подпоследовательность) строк в FASTA-формате, записанных в файле.
+
+Если общей подпоследовательности нет, надо вывести `none`.
+
+Использовать стандартные потоки ввода и вывода.
+
+Можно использовать только стандартные библиотеки python.
+## Входные данные
+Название файла, содержащего данные, записанные в FASTA-формате. Например "test1.txt":
+
+## Выходные данные
+Наибольшая общая подстрока строк, указанных в файле
+## Пример
+**Входные данные:**
+```txt
+>string_1
+ACGTACGT
+>string_2
+GTACGTCA
+>string_3
+ACG
+```
+**Выходные данные:**
+>ACG
 
 
-# `rtt.py`: Вычисление белковых весов
+# `pwe.py`: Вычисление белковых весов
 ## Входные данные
 Белковая строка $P$ длиной не более 1000 символов.
 
 ## Выходные данные
-Суммарный вес строки $P$ (моноизотопная масса белка).
+Суммарный вес строки $P$ ([моноизотопная масса белка](http://www2.riken.jp/BiomolChar/Aminoacidmolecularmasses.htm)).
 
 ## Пример
-Входные данные
+**Входные данные:**
 >PRQTEINSTRING
 
-Выходные данные
+**Выходные данные:**
 >1466.7589799999998
 
 
@@ -112,7 +142,9 @@ $$
 
 ## Пример
 Входные данные
->`/usr/local/share/ejudge-problems-files/data-analisys/1var`
+```txt
+/usr/local/share/ejudge-problems-files/data-analisys/1var
+```
 
 Выходные данные
 ```
