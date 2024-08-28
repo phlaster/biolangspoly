@@ -33,13 +33,13 @@ CORRECT = list(reversed([
 ]))
 
 
-def show_step(t, h, R, counter, y, color=Fore.WHITE):
+def show_step(t, h, R, counter, y, color=Fore.YELLOW):
     print(color + "%6f\t%6f\t%6e\t%d\t%s\t" % (t, h, R, counter[0], '\t'.join('%6f' % y_i for y_i in y)))
     print(Style.RESET_ALL, end='')
 
 
 def show_correct(S, color=Fore.GREEN):
-    print(color + S + Style.RESET_ALL)
+    print(color + str(S) + Style.RESET_ALL)
 
 
 def extract_function(code_str):
