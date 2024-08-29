@@ -58,6 +58,7 @@ def extract_function(code_str):
     return None
 
 
+
 def read_input():
     t_0 = float(input())
     T = float(input())
@@ -65,9 +66,13 @@ def read_input():
     N_x = int(input())
     eps = float(input())
     n = int(input())
-    
     code_with_func = "\n".join([input() for i in range(n + 3)])
     foo = extract_function(code_with_func)
     initial_conditions = np.array(list(map(float, input().split())))
-
+    
+    if h_0 <= 0 or eps <= 0 or T <= t_0:
+        raise ValueError("Invalid input values: ensure h_0 > 0, eps > 0, and T > t_0")
+    if len(initial_conditions) != n:
+        raise ValueError("Number of initial conditions does not match the number of equations")
+    
     return t_0, T, h_0, N_x, eps, foo, initial_conditions
