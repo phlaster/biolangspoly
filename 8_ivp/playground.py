@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from ivp_goodparts import *
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -8,7 +9,7 @@ def reference_solution(t_0, T, h_0, N_x, eps, f, initial_conditions):
         return f(t, y, kounter)
 
     kounter = [0]
-    sol = solve_ivp(f_wrapper, (t_0, T), initial_conditions, method='RK45', atol=eps, rtol=eps).y[:, -1]
+    sol = solve_ivp(f_wrapper, (t_0, T), initial_conditions, rtol=eps).y[:, -1]
     show_step(T, 0, 0, kounter, sol, color=Fore.GREEN)
     return sol
 #################################################################################
@@ -27,7 +28,7 @@ def heun_step(f, t, y, h, counter):
     return v_corrected
 
 
-def solve_ode(step_func, t_0, T, h_0, N_x, eps, rhs_func, initial_conditions, THETA, color=Fore.LIGHTRED_EX):
+def solve_ode(method, t_0, T, h_0, N_x, eps, rhs, initial_conditions, THETA, color=Fore.LIGHTRED_EX):
     t = t_0
     y = initial_conditions
     h = h_0
@@ -37,14 +38,14 @@ def solve_ode(step_func, t_0, T, h_0, N_x, eps, rhs_func, initial_conditions, TH
     memo_h = None
     memo_h_12 = None
     show_step(t, h, R, kounter, y, color=color)
-    while t < T:
+    while t+h/2 < T:
         if kounter[0] >= N_x:
             print(f"Maximum number of function calls ({N_x}) reached.")
             break
         h2 = h / 2
-        y_next    = step_func(rhs_func, t   , y,         h,  kounter) if memo_h    is None else memo_h
-        y_next_12 = step_func(rhs_func, t   , y,         h2, kounter) if memo_h_12 is None else memo_h_12
-        y_next_22 = step_func(rhs_func, t+h2, y_next_12, h2, kounter)
+        y_next    = method(rhs, t,    y,         h,  kounter) if memo_h    is None else memo_h
+        y_next_12 = method(rhs, t,    y,         h2, kounter) if memo_h_12 is None else memo_h_12
+        y_next_22 = method(rhs, t+h2, y_next_12, h2, kounter)
 
         R = THETA * np.linalg.norm(y_next - y_next_22, 2)
         if R > eps:
@@ -61,8 +62,6 @@ def solve_ode(step_func, t_0, T, h_0, N_x, eps, rhs_func, initial_conditions, TH
             memo_h = None
             memo_h_12 = None
             show_step(t, h, R, kounter, y, color=color)
-            if T-t < h:
-                break
     return y
 
 ###################################################################################
