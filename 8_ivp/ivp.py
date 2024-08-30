@@ -31,60 +31,50 @@ def read_input():
         raise ValueError("Number of initial conditions does not match the number of equations")
     return t_0, T, h_0, N_x, eps, foo, initial_conditions
 
-def heun_step(f, t, y, h, counter):
-    k1 = f(t, y, counter)
-    v_predictor = y + h * k1
-    k2 = f(t + h, v_predictor, counter)
-    v_corrected = y + 0.5 * h * (k1 + k2)
-    return v_corrected
+def heun_step(f, y, t, h, counter, k1=None):
+    k1 = f(t, y, counter) if k1 is None else k1
+    y_predictor = y + h * k1
+    k2 = f(t+h, y_predictor, counter)
+    y_corrected = y + h/2 * (k1 + k2)
+    return y_corrected, k1, k2
 
-def solve_ode(method, t_0, T, h_0, N_x, eps, rhs, initial_conditions, THETA, ostream=True):
+
+
+def solve_ode(method, t_0, T, h_0, N_x, eps, rhs, y_0, THETA=2.0, ostream=True):
     t = t_0
-    y = initial_conditions
+    y = y_0
     h = h_0
     kounter = [0]
     R = 0.0
 
-    memo_h = None
-    memo_h_12 = None
-
-    history_counter = []
-    history_h = []
-    history_t = []
-    history_R = []
-
+    cached_k01 = None
+    history_counter = [kounter[0]]
+    history_h = [h]
+    history_t = [t]
+    history_R = [R]
     ostream and show_step(t, h, R, kounter, y)
-    
-    history_counter.append(kounter[0])
-    history_h.append(h)
-    history_t.append(t)
-    history_R.append(R)
-
     while t+h/2 < T:
         if kounter[0] >= N_x:
             print(f"Maximum number of function calls ({N_x}) reached.")
             break
-        h2 = h / 2
-        y_next    = method(rhs, t,    y,         h,  kounter) if memo_h    is None else memo_h
-        y_next_12 = method(rhs, t,    y,         h2, kounter) if memo_h_12 is None else memo_h_12
-        y_next_22 = method(rhs, t+h2, y_next_12, h2, kounter)
+        h2 = h/2
 
-        R = THETA * np.linalg.norm(y_next - y_next_22, 2)
-        if R > eps:
+        y1, k01,k02 = method(rhs,y,  t   ,h, kounter,k1=cached_k01)
+        y21,k11,k12 = method(rhs,y,  t   ,h2,kounter,k1=k01)
+        y22,k21,k22 = method(rhs,y21,t+h2,h2,kounter,k1=k12)
+
+        R = THETA * np.linalg.norm(y1 - y22, 2)
+        if R >= eps:
+            cached_k01 = k11
             h = h2
-            memo_h = y_next_12
-            memo_h_12 = None
         elif R < eps / 64:
-            h *= 2
-            memo_h_12 = y_next
-            memo_h = None
+            h = 2*h
+            cached_k01 = k11
         else:
-            t += h
-            y = y_next_22
-            memo_h = None
-            memo_h_12 = None
+            cached_k01 = k02
+            t = t+h
+            y = y22
             ostream and show_step(t, h, R, kounter, y)
-
             history_counter.append(kounter[0])
             history_h.append(h)
             history_t.append(t)
@@ -92,9 +82,8 @@ def solve_ode(method, t_0, T, h_0, N_x, eps, rhs, initial_conditions, THETA, ost
     return y, history_counter, history_h, history_t, history_R
 
 def main():
-    t_0, T, h_0, N_x, eps, fs, iconds = read_input()
-    THETA = 2.0
-    heun = solve_ode(heun_step, t_0, T, h_0, N_x, eps, fs, iconds, THETA)
+    t_0, T, h_0, N_x, eps, rhs, y_0 = read_input()
+    heun = solve_ode(heun_step, t_0, T, h_0, N_x, eps, rhs, y_0)
 
 if __name__ == "__main__":
     main()
