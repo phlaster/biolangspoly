@@ -105,14 +105,13 @@ def main():
 
     epsilons = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9]
     if manual:
-        t_0, T, h_0, N_x, eps, fs, iconds = read_input()
-        solve_heun = lambda eps: solve_ode(heun_step, t_0, T, h_0, N_x, eps, fs, iconds, 2.0, ostream=False)
-        ref = reference_solution(t_0, T, h_0, N_x, 1e-13, fs, iconds)
+        t_0, T, h_0, N_x, eps, rhs, y_0 = read_input()
+        solve_heun = lambda eps: solve_ode(heun_step, t_0, T, h_0, N_x, eps, rhs, y_0, ostream=False)
+        ref = reference_solution(t_0, T, h_0, N_x, 1e-13, rhs, iconds)
     else:
         solve_heun, ref = automatic_trial()
 
     history_errors = []
-    history_counters = []
     history_hs = []
     history_ts = []
     history_mean_Rs = []
@@ -130,7 +129,6 @@ def main():
         history_hs.append(history_h)
         min_step_size_data.append(min(history_h))
         num_steps_data.append(len(history_t))
-
 
     plot_running_h(history_ts[:6], history_hs[:6], epsilons[:6])
     plot_results(epsilons, min_step_size_data, num_steps_data)
