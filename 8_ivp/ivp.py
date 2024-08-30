@@ -92,9 +92,9 @@ def solve_ode(method, t_0, T, h_0, N_x, eps, rhs, initial_conditions, THETA, ost
     return y, history_counter, history_h, history_t, history_R
 
 def main():
-    t_0, T, h_0, N_x, eps, fs, initial_conditions = read_input()
+    t_0, T, h_0, N_x, eps, fs, iconds = read_input()
     THETA = 2.0
-    heun = solve_ode(heun_step, t_0, T, h_0, N_x, eps, fs, initial_conditions, THETA)
+    heun = solve_ode(heun_step, t_0, T, h_0, N_x, eps, fs, iconds, THETA)
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 import numpy as np
+import sys
 import matplotlib.pyplot as plt
-from ivp import solve_ode, heun_step#, read_input
+from ivp import solve_ode, heun_step, read_input
 from scipy.integrate import solve_ivp
 
 def reference_solution(t_0, T, h_0, N_x, eps, f, initial_conditions):
@@ -9,7 +11,8 @@ def reference_solution(t_0, T, h_0, N_x, eps, f, initial_conditions):
         return f(t, y, kounter)
 
     kounter = [0]
-    sol = solve_ivp(f_wrapper, (t_0, T), initial_conditions, rtol=eps).y[:, -1]
+    max_step_size = (T - t_0) / N_x
+    sol = solve_ivp(f_wrapper, (t_0, T), initial_conditions, rtol=eps, max_step=max_step_size).y[:, -1]
     return sol
 
 def plot_results(eps_data, min_step_size_data, num_steps_data):
@@ -18,21 +21,19 @@ def plot_results(eps_data, min_step_size_data, num_steps_data):
     ax1 = plt.gca()
     ax2 = ax1.twinx()
 
-    ax1.plot(eps_data, num_steps_data, 'o-', color='blue', label='Number of Steps')
-    ax1.set_xlabel('Specified Accuracy (eps)')
-    ax1.set_ylabel('Number of Steps', color='blue')
+    ax1.plot(eps_data, num_steps_data, 'o-', color='blue')
+    ax1.set_xlabel('Заданная точность (eps)')
+    ax1.set_ylabel('Количество шагов', color='blue')
     ax1.set_xscale('log')
     ax1.set_yscale('log')
     ax1.tick_params(axis='y', labelcolor='blue')
-    ax1.set_title('Dependence of Number of Steps and Minimum Step Size on Specified Accuracy')
-    ax1.legend(loc='upper left')
+    ax1.set_title('Зависимость количества шагов и минимального размера шага от заданной точности')
     ax1.grid(True, which='major', linestyle='--', linewidth=0.5, color='blue', alpha=0.6)
 
-    ax2.plot(eps_data, min_step_size_data, 's-', color='red', label='Minimum Step Size h')
-    ax2.set_ylabel('Minimum Step Size h', color='red')
+    ax2.plot(eps_data, min_step_size_data, 's-', color='red')
+    ax2.set_ylabel('Минимальный размер шага h', color='red')
     ax2.set_yscale('log')
     ax2.tick_params(axis='y', labelcolor='red')
-    ax2.legend(loc='upper right')
     ax2.grid(True, which='major', linestyle='--', linewidth=0.5, color='red', alpha=0.6)
 
     plt.tight_layout()
@@ -44,9 +45,9 @@ def plot_running_h(history_t_list, history_h_list, epsilons):
     for i, eps in enumerate(epsilons):
         plt.plot(history_t_list[i], history_h_list[i], label=f'eps = {eps}')
 
-    plt.xlabel('Time t')
-    plt.ylabel('Step Size h')
-    plt.title('Step Size h over Time t for Different Values of eps')
+    plt.xlabel('Время t')
+    plt.ylabel('Размер шага h')
+    plt.title('Размер шага h в зависимости от времени t для разных значений eps')
     plt.legend()
     plt.grid(True, which='both', linestyle='--', linewidth=0.5)
     plt.gca().set_yscale('log')
@@ -60,30 +61,26 @@ def plot_errors(epsilons, errors, mean_Rs):
 
     ax = plt.gca()
 
-    # Plot errors
-    ax.plot(epsilons, errors, 'o-', color='red', label='Errors')
-    ax.set_xlabel('Specified Accuracy (eps)')
-    ax.set_ylabel('Errors / Mean Runge Estimates', color='black')
+    ax.plot(epsilons, errors, 'o-', color='red', label='Фактическая ошибка')
+    ax.set_xlabel('Заданная точность (eps)')
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.tick_params(axis='y', labelcolor='black')
-    ax.set_title('Dependence of Errors and Mean Runge Estimates on Specified Accuracy')
+    ax.set_title('Оценки Рунге и фактические ошибки в зависимости от выбранной точности')
     ax.legend(loc='upper left')
     ax.grid(True, which='major', linestyle='--', linewidth=0.5, color='grey', alpha=0.6)
 
-    # Plot mean Runge estimates
-    ax.plot(epsilons, mean_Rs, 's-', color='blue', label='Mean Runge Estimates')
+    ax.plot(epsilons, mean_Rs, 's-', color='blue', label='Средняя оценка Рунге на интервале')
     ax.legend(loc='upper left')
 
     plt.tight_layout()
     plt.show()
 
-def main():
+def automatic_trial():
     t_0 = 1.5
     T = 2.5
     h_0 = 0.1
     N_x = 10_000
-    epsilons = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9]
     THETA = 2.0
     def fs(t, v, kounter):
         A = np.array([
@@ -94,7 +91,25 @@ def main():
         kounter[0] += 1
         return np.dot(A, v)
     iconds = np.array([1., 1., 2.])
-    solve_heun = lambda eps: solve_ode(heun_step, t_0, T, h_0, N_x, eps, fs, iconds, THETA, ostream=False)
+    ref = reference_solution(t_0, T, h_0, N_x, 1e-13, fs, iconds)
+    return lambda eps: solve_ode(heun_step, t_0, T, h_0, N_x, eps, fs, iconds, THETA, ostream=False), ref
+
+def main():
+    manual = False
+    for arg in sys.argv[1:]:
+        if arg == '-m':
+            manual = True
+        else:
+            print(f"Error: Unknown flag '{arg}'")
+            sys.exit(1)
+
+    epsilons = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9]
+    if manual:
+        t_0, T, h_0, N_x, eps, fs, iconds = read_input()
+        solve_heun = lambda eps: solve_ode(heun_step, t_0, T, h_0, N_x, eps, fs, iconds, 2.0, ostream=False)
+        ref = reference_solution(t_0, T, h_0, N_x, 1e-13, fs, iconds)
+    else:
+        solve_heun, ref = automatic_trial()
 
     history_errors = []
     history_counters = []
@@ -104,7 +119,7 @@ def main():
     min_step_size_data = []
     num_steps_data = []
 
-    ref = reference_solution(t_0, T, h_0, N_x, 1e-16, fs, iconds)
+    
     for eps in epsilons:
         y, history_counter, history_h, history_t, history_R = solve_heun(eps)
         err = np.linalg.norm(y - ref, 2)
@@ -117,8 +132,8 @@ def main():
         num_steps_data.append(len(history_t))
 
 
-    # plot_running_h(history_ts[:6], history_hs[:6], epsilons[:6])
-    # plot_results(epsilons, min_step_size_data, num_steps_data)
+    plot_running_h(history_ts[:6], history_hs[:6], epsilons[:6])
+    plot_results(epsilons, min_step_size_data, num_steps_data)
     plot_errors(epsilons, history_errors, history_mean_Rs)
 
 if __name__ == "__main__":
